@@ -1282,18 +1282,19 @@ function addComment(taskId) {
 }
 
 function addToCalendar(id) {
-  toast('Función disponible en Paso 3 (Apps Script)');
-}
-
-function sendToGoogleCalendar(id) {
   const t = TASKS.find(x => x.id === id);
+  const resp = getUser(t.responsable);
   showModal(`
     <div class="modal-header">
       <div>
-        <div class="modal-subtitle">Google Calendar</div>
-        <div class="modal-title">Crear evento</div>
+        <div class="modal-subtitle">Agenda del equipo</div>
+        <div class="modal-title">Crear evento compartido</div>
       </div>
       <button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="info-banner" style="margin-bottom:12px;">
+      <i class="ti ti-info-circle"></i>
+      <div class="info-banner-text">Se creará en el calendario de <b>urbantareas@gmail.com</b>, visible para todo el equipo.</div>
     </div>
     <div class="form-card">
       <div class="form-row">
@@ -1317,12 +1318,12 @@ function sendToGoogleCalendar(id) {
         </select>
       </div>
     </div>
-    <button class="btn-primary" onclick="confirmSendToGCal(${id})">Enviar a Google Calendar</button>
+    <button class="btn-primary" onclick="confirmAddToAgenda(${id})">Crear en Agenda del equipo</button>
     <button class="btn-secondary" style="margin-top:8px;" onclick="closeModal()">Cancelar</button>
   `);
 }
 
-function confirmSendToGCal(id) {
+function confirmAddToAgenda(id) {
   const t = TASKS.find(x => x.id === id);
   const title = document.getElementById('gcTitle').value;
   const date = document.getElementById('gcDate').value;
@@ -1335,7 +1336,7 @@ function confirmSendToGCal(id) {
     return;
   }
 
-  toast('Enviando a Google Calendar...');
+  toast('Enviando a Agenda...');
   closeModal();
 
   fetch(APPS_SCRIPT_URL, {
@@ -1353,10 +1354,7 @@ function confirmSendToGCal(id) {
   .then(r => r.json())
   .then(data => {
     if (data.success) {
-      t.sentToGCal = true;
-      db.ref('tareas/' + id + '/sentToGCal').set(true);
-      toast('✓ Evento creado en Google Calendar');
-      renderTasks();
+      toast('✓ Evento creado en Agenda del equipo');
     } else {
       toast('Error: ' + (data.error || 'desconocido'));
     }
@@ -1365,6 +1363,24 @@ function confirmSendToGCal(id) {
     toast('Error de conexión');
     console.error(err);
   });
+}
+
+function sendToGoogleCalendar(id) {
+  const t = TASKS.find(x => x.id === id);
+  const title = encodeURIComponent(t.title);
+  const desc = encodeURIComponent((t.desc || '') + '\n\nCreado desde Urban Tasks');
+  const date = (t.dueDate || new Date().toISOString().slice(0,10)).replace(/-/g, '');
+  const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${date}T100000/${date}T110000&details=${desc}&location=${encodeURIComponent('Urban Comercial — Sta. Elena de Huechuraba 1701')}`;
+  
+  t.sentToGCal = true;
+  db.ref('tareas/' + id + '/sentToGCal').set(true);
+  window.open(url, '_blank');
+  toast('Abriendo tu Google Calendar...');
+  renderTasks();
+}
+
+function confirmSendToGCal(id) {
+  sendToGoogleCalendar(id);
 }
 
 // ============= SEND MODAL =============
