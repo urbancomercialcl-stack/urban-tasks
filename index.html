@@ -1441,10 +1441,32 @@ function confirmSend(id) {
     window.open(`https://wa.me/${resp.phone.replace(/\D/g,'')}?text=${msg}`, '_blank');
   }
   if (email) {
-    toast('Email se enviará vía servidor (Paso 4)');
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'sendEmail',
+        to: resp.email,
+        toName: resp.name.split(' ')[0],
+        taskTitle: t.title,
+        taskDesc: t.desc || '',
+        priority: getPriority(t.priority).label,
+        dueDate: t.dueDate ? formatDate(t.dueDate) : '',
+        senderName: CURRENT_USER.name.split(' ')[0],
+        taskUrl: 'https://urban-tasks.vercel.app/?t=' + t.id
+      })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        toast('✓ Email enviado a ' + resp.name.split(' ')[0]);
+      } else {
+        toast('Error email: ' + (data.error || 'desconocido'));
+      }
+    })
+    .catch(err => toast('Error de conexión'));
   }
   closeModal();
-  if (wsp) toast('WhatsApp abierto');
+  if (wsp && !email) toast('WhatsApp abierto');
 }
 
 // ============= SETTINGS =============
