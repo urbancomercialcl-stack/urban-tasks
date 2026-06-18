@@ -581,6 +581,9 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+// Apps Script Web App URL (Paso 3)
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwO0eaNo7KKw93lg9FuhgSG8g_mata2GApkMyrBSc3XKRojD3-N-Dvcb6qfNeK0xt_n/exec';
+
 // ============= DATA =============
 const TEAM = [
   { id: 'danilo',   name: 'Danilo Gallegos',  role: 'admin',  phone: '+56984701093', email: 'danilo.gallegos@urbancomercial.cl', pass: 'urban2026', mustChange: false, color: { bg: '#1a1a1a', fg: '#FFD100' } },
@@ -1321,11 +1324,47 @@ function sendToGoogleCalendar(id) {
 
 function confirmSendToGCal(id) {
   const t = TASKS.find(x => x.id === id);
-  t.sentToGCal = true;
-  db.ref('tareas/' + id + '/sentToGCal').set(true);
+  const title = document.getElementById('gcTitle').value;
+  const date = document.getElementById('gcDate').value;
+  const time = document.getElementById('gcTime').value;
+  const reminder = document.getElementById('gcReminder').value;
+  const resp = getUser(t.responsable);
+
+  if (!APPS_SCRIPT_URL) {
+    toast('Falta configurar Apps Script URL');
+    return;
+  }
+
+  toast('Enviando a Google Calendar...');
   closeModal();
-  toast('Enviada a tu Google Calendar');
-  renderTasks();
+
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      action: 'createEvent',
+      title,
+      date,
+      time,
+      reminder,
+      description: t.desc || '',
+      responsable: resp ? resp.name : ''
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      t.sentToGCal = true;
+      db.ref('tareas/' + id + '/sentToGCal').set(true);
+      toast('✓ Evento creado en Google Calendar');
+      renderTasks();
+    } else {
+      toast('Error: ' + (data.error || 'desconocido'));
+    }
+  })
+  .catch(err => {
+    toast('Error de conexión');
+    console.error(err);
+  });
 }
 
 // ============= SEND MODAL =============
