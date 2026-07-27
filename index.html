@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#1a1a1a">
 <title>Urban Tasks</title>
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css" rel="stylesheet">
@@ -18,14 +18,22 @@
   --white: #ffffff;
   --gray-50: #f0f0eb;
   --gray-100: #e0e0dc;
-  --gray-300: #aaaaa5;
-  --gray-500: #888;
-  --gray-700: #555;
+  --gray-300: #8f8f89;
+  --gray-500: #666663;
+  --gray-700: #444441;
   --red: #c93636;
-  --amber: #b07000;
-  --green: #1a9e75;
-  --purple: #7F77DD;
-  --blue: #4285F4;
+  --amber: #a05f00;
+  --amber-strong: #8a5200;
+  --green: #178064;
+  --green-strong: #106b53;
+  --purple: #6b62d6;
+  --blue: #3b6fd1;
+  --shadow-sm: 0 1px 2px rgba(26,26,26,0.06);
+  --shadow-md: 0 4px 16px rgba(26,26,26,0.08);
+  --shadow-lg: 0 8px 32px rgba(26,26,26,0.12);
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
 }
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -36,12 +44,34 @@ body {
   padding-bottom: 90px;
   min-height: 100vh;
 }
-input, textarea, select, button { font-family: inherit; font-size: inherit; outline: none; }
+input, textarea, select, button { font-family: inherit; font-size: inherit; }
 button { cursor: pointer; border: none; background: none; color: inherit; }
+
+/* Accessibility: visible focus indicator everywhere (WCAG 2.4.7) */
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible,
+select:focus-visible, [tabindex]:focus-visible, .task-card:focus-visible,
+.kanban-card:focus-visible, .cal-day:focus-visible, .chip:focus-visible {
+  outline: 2.5px solid var(--black);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.login-screen :focus-visible, .bottom-nav :focus-visible, .desktop-sidebar :focus-visible {
+  outline-color: var(--yellow);
+}
+/* Screen-reader only text, for accessible labels that shouldn't show visually */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+.form-label-visible { font-size: 11px; color: var(--gray-500); margin-bottom: 6px; font-weight: 500; }
 
 /* Layout */
 .app { max-width: 480px; margin: 0 auto; padding: 16px 16px 0; }
 .hidden { display: none !important; }
+/* Bug real encontrado: el sidebar de escritorio no tenía "display:none" por defecto,
+   así que en pantallas angostas (celulares) aparecía como una lista de texto sin estilo
+   apilada encima del contenido. Solo debe mostrarse (display:flex) desde los 900px. */
+.desktop-sidebar { display: none; }
 
 /* Login */
 .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--black); padding: 24px; margin: -16px -16px 0; }
@@ -93,8 +123,10 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 .task-card { background: var(--white); border-radius: 14px; padding: 14px; margin-bottom: 6px; border-left: 3px solid var(--gray-100); }
 .task-card.curso { border-left-color: var(--yellow); }
 .task-card.revision { border-left-color: var(--purple); }
-.task-card.completada { opacity: 0.65; }
-.task-card.completada .task-title { text-decoration: line-through; }
+.task-card.completada { background: var(--gray-50); border-left-color: var(--green); }
+.task-card.completada .task-title { text-decoration: line-through; color: var(--gray-700); }
+.task-card.completada .task-meta .mini-avatar { filter: grayscale(35%); }
+.task-row-btn { all: unset; display: block; width: 100%; box-sizing: border-box; cursor: pointer; border-radius: 8px; }
 .task-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
 .task-info { flex: 1; min-width: 0; }
 .task-title { font-size: 14px; font-weight: 500; color: var(--black); margin-bottom: 4px; line-height: 1.3; }
@@ -105,8 +137,10 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 .task-meta .alta { color: var(--red); }
 .task-meta .media { color: var(--amber); }
 .task-meta .baja { color: var(--gray-500); }
-.task-meta .badge-cal { background: rgba(66,133,244,0.15); color: var(--blue); padding: 2px 6px; border-radius: 5px; font-size: 9px; font-weight: 500; display: inline-flex; align-items: center; gap: 3px; }
-.task-meta .badge-private { background: rgba(127,119,221,0.15); color: var(--purple); padding: 2px 6px; border-radius: 5px; font-size: 9px; font-weight: 500; }
+.task-meta .overdue { color: var(--red); font-weight: 600; }
+.task-meta .badge-cal { background: rgba(59,111,209,0.15); color: var(--blue); padding: 2px 6px; border-radius: 5px; font-size: 9px; font-weight: 500; display: inline-flex; align-items: center; gap: 3px; }
+.task-meta .badge-private { background: rgba(107,98,214,0.15); color: var(--purple); padding: 2px 6px; border-radius: 5px; font-size: 9px; font-weight: 500; }
+.task-meta .badge-overdue { background: rgba(201,54,54,0.12); color: var(--red); padding: 2px 6px; border-radius: 5px; font-size: 9px; font-weight: 600; display: inline-flex; align-items: center; gap: 3px; }
 .task-chevron { color: var(--gray-300); font-size: 18px; flex-shrink: 0; }
 
 /* Expanded task content */
@@ -158,22 +192,41 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 .btn-danger { width: 100%; background: var(--white); color: var(--red); border-radius: 12px; padding: 12px; font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px; }
 .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 
-/* Toggle switch */
-.toggle { width: 44px; height: 24px; background: var(--gray-100); border-radius: 12px; position: relative; cursor: pointer; transition: background 0.2s; }
-.toggle.on { background: var(--yellow); }
-.toggle::after { content: ""; width: 20px; height: 20px; background: var(--white); border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-.toggle.on::after { left: 22px; background: var(--black); }
+/* Toggle switch — real checkbox underneath for keyboard + screen reader support */
+.toggle-wrap { position: relative; width: 44px; height: 24px; flex-shrink: 0; display: inline-block; }
+input.toggle { appearance: none; -webkit-appearance: none; width: 44px; height: 24px; margin: 0; background: var(--gray-100); border-radius: 12px; position: relative; cursor: pointer; transition: background 0.2s; }
+input.toggle:checked { background: var(--yellow); }
+input.toggle::after { content: ""; width: 20px; height: 20px; background: var(--white); border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+input.toggle:checked::after { left: 22px; background: var(--black); }
 
-/* Pills */
+/* Pills — visually a pill, backed by a real radio button for keyboard access */
 .pill-row { display: flex; gap: 6px; flex-wrap: wrap; }
-.pill { padding: 5px 12px; border-radius: 8px; font-size: 12px; background: var(--bg); color: var(--gray-700); cursor: pointer; }
+.pill-row input[type="radio"] { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.pill { padding: 5px 12px; border-radius: 8px; font-size: 12px; background: var(--bg); color: var(--gray-700); cursor: pointer; display: inline-block; }
+.pill-row input[type="radio"]:checked + .pill,
 .pill.active { background: var(--black); color: var(--yellow); font-weight: 500; }
+.pill-row input[type="radio"]:focus-visible + .pill { outline: 2.5px solid var(--black); outline-offset: 2px; }
 .pill-status-alta { background: var(--bg); color: var(--red); }
-.pill-status-alta.active { background: var(--red); color: white; }
+.pill-row input:checked + .pill-status-alta, .pill-status-alta.active { background: var(--red); color: white; }
 .pill-status-media { background: var(--bg); color: var(--amber); }
-.pill-status-media.active { background: var(--amber); color: white; }
+.pill-row input:checked + .pill-status-media, .pill-status-media.active { background: var(--amber); color: white; }
 .pill-status-baja { background: var(--bg); color: var(--gray-500); }
-.pill-status-baja.active { background: var(--gray-500); color: white; }
+.pill-row input:checked + .pill-status-baja, .pill-status-baja.active { background: var(--gray-500); color: white; }
+
+/* Reusable badges + detail rows (reemplaza estilos inline repetidos en los modales) */
+.badge-row { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.status-badge { background: var(--black); color: var(--yellow); padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 500; }
+.priority-badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 500; }
+.priority-badge.alta { background: rgba(201,54,54,0.15); color: var(--red); }
+.priority-badge.media { background: rgba(160,95,0,0.15); color: var(--amber-strong); }
+.priority-badge.baja { background: var(--gray-50); color: var(--gray-500); }
+.private-badge { background: rgba(107,98,214,0.15); color: var(--purple); padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 500; }
+.detail-title { font-size: 20px; font-weight: 500; letter-spacing: -0.3px; line-height: 1.3; margin-bottom: 8px; }
+.detail-desc { font-size: 13px; color: var(--gray-700); line-height: 1.5; }
+.detail-row { display: flex; justify-content: space-between; align-items: center; }
+.detail-row .k { font-size: 12px; color: var(--gray-500); display: flex; align-items: center; gap: 6px; }
+.detail-row .v { font-size: 13px; }
+.icon-btn-row { display: flex; gap: 6px; }
 
 /* Calendar */
 .calendar-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
@@ -197,22 +250,33 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 .cal-legend .dot { width: 6px; height: 6px; border-radius: 50%; }
 
 /* Kanban */
+.kanban-scroll-wrap { position: relative; }
+.kanban-scroll-wrap::after {
+  content: ""; position: absolute; top: 0; right: 0; bottom: 12px; width: 28px; pointer-events: none;
+  background: linear-gradient(to right, rgba(247,247,245,0), var(--bg));
+}
+.kanban-scroll-hint { font-size: 11px; color: var(--gray-500); display: flex; align-items: center; gap: 4px; margin-bottom: 8px; }
 .kanban-container { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 12px; margin: 0 -16px; padding-left: 16px; padding-right: 16px; }
 .kanban-container::-webkit-scrollbar { display: none; }
-.kanban-col { min-width: 240px; flex-shrink: 0; }
+.kanban-col { min-width: 240px; flex-shrink: 0; border-radius: var(--radius-md); transition: background 0.15s; }
+.kanban-col.drag-over { background: rgba(255,209,0,0.12); outline: 2px dashed var(--yellow); outline-offset: 4px; }
 .kanban-col-header { display: flex; justify-content: space-between; align-items: center; padding: 0 4px 10px; }
 .kanban-col-title { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; }
 .kanban-col-title .dot { width: 8px; height: 8px; border-radius: 50%; }
 .kanban-col-count { font-size: 11px; color: var(--gray-500); }
-.kanban-card { background: var(--white); border-radius: 12px; padding: 12px; margin-bottom: 6px; cursor: pointer; }
+.kanban-card { background: var(--white); border-radius: 12px; padding: 12px; margin-bottom: 6px; cursor: grab; transition: box-shadow 0.15s, opacity 0.15s; }
 .kanban-card.curso { border: 1.5px solid var(--yellow); }
-.kanban-card.completada { opacity: 0.65; }
-.kanban-card.completada .kanban-card-title { text-decoration: line-through; }
+.kanban-card.completada { background: var(--gray-50); }
+.kanban-card.completada .kanban-card-title { text-decoration: line-through; color: var(--gray-700); }
+.kanban-card.dragging { opacity: 0.4; }
+.kanban-card-move { border: none; background: var(--gray-50); border-radius: 6px; font-size: 10px; color: var(--gray-700); padding: 3px 6px; }
 .kanban-card-title { font-size: 13px; font-weight: 500; color: var(--black); margin-bottom: 6px; line-height: 1.3; }
 .kanban-card-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
 .kanban-card-tag { background: var(--gray-50); padding: 2px 7px; border-radius: 5px; font-size: 10px; color: var(--gray-700); }
-.kanban-card-bottom { display: flex; justify-content: space-between; align-items: center; }
-.kanban-card-bottom .mini-avatar { width: 22px; height: 22px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; }
+.kanban-card-bottom { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.kanban-card-bottom .mini-avatar { width: 22px; height: 22px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; flex-shrink: 0; }
+.kanban-card-bottom > span:nth-child(2) { flex: 1; }
+.kanban-card-detail-btn { width: 26px; height: 26px; border-radius: 7px; background: var(--gray-50); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--gray-700); }
 
 /* Profile / Settings */
 .profile-hero { text-align: center; margin-bottom: 20px; }
@@ -271,6 +335,12 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 .empty-state i { font-size: 36px; margin-bottom: 12px; opacity: 0.5; }
 .empty-state-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; color: var(--gray-700); }
 .empty-state-sub { font-size: 12px; }
+
+/* Boot loading */
+.boot-loading { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--black); gap: 14px; }
+.boot-loading .login-logo { animation: pulse 1.1s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+.boot-loading-text { color: #999; font-size: 13px; }
 
 /* Toast */
 .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--black); color: var(--yellow); padding: 12px 20px; border-radius: 12px; font-size: 13px; font-weight: 500; z-index: 300; box-shadow: 0 4px 20px rgba(0,0,0,0.2); animation: toastIn 0.3s; }
@@ -376,16 +446,26 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 </head>
 <body>
 
+<!-- BOOT LOADING -->
+<div id="bootLoading" class="boot-loading">
+  <div class="login-logo"><i class="ti ti-checks"></i></div>
+  <div class="boot-loading-text">Cargando Urban Tasks…</div>
+</div>
+
 <!-- LOGIN -->
-<div id="loginScreen" class="login-screen">
+<div id="loginScreen" class="login-screen hidden">
   <div class="login-card">
     <div class="login-logo"><i class="ti ti-checks"></i></div>
     <div class="login-title">Urban Tasks</div>
     <div class="login-subtitle">Pendientes del equipo</div>
-    <input type="text" class="login-input" id="loginUser" placeholder="Usuario" autocomplete="username">
-    <input type="password" class="login-input" id="loginPass" placeholder="Contraseña" autocomplete="current-password">
-    <button class="login-btn" onclick="doLogin()">Ingresar</button>
-    <div id="loginError" class="login-error hidden"></div>
+    <form id="loginForm" onsubmit="return doLogin(event)">
+      <label class="sr-only" for="loginUser">Usuario</label>
+      <input type="text" class="login-input" id="loginUser" placeholder="Usuario" autocomplete="username">
+      <label class="sr-only" for="loginPass">Contraseña</label>
+      <input type="password" class="login-input" id="loginPass" placeholder="Contraseña" autocomplete="current-password">
+      <button type="submit" class="login-btn">Ingresar</button>
+      <div id="loginError" class="login-error hidden" role="alert"></div>
+    </form>
   </div>
 </div>
 
@@ -475,8 +555,9 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
         <div class="calendar-month" id="calMonth"></div>
       </div>
       <div class="calendar-nav">
-        <button onclick="changeMonth(-1)"><i class="ti ti-chevron-left"></i></button>
-        <button onclick="changeMonth(1)"><i class="ti ti-chevron-right"></i></button>
+        <button onclick="goToToday()" aria-label="Ir a hoy" style="width:auto;padding:0 12px;font-size:12px;font-weight:500;">Hoy</button>
+        <button onclick="changeMonth(-1)" aria-label="Mes anterior"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+        <button onclick="changeMonth(1)" aria-label="Mes siguiente"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
       </div>
     </div>
 
@@ -503,7 +584,10 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
       </div>
       <div class="avatar avatar-me" id="userAvatarKanban"></div>
     </div>
-    <div class="kanban-container" id="kanbanContainer"></div>
+    <div class="kanban-scroll-hint"><i class="ti ti-arrows-horizontal" aria-hidden="true"></i> Arrastra una tarjeta para cambiar su estado, o desliza para ver todas las columnas</div>
+    <div class="kanban-scroll-wrap">
+      <div class="kanban-container" id="kanbanContainer"></div>
+    </div>
   </div>
 
   <!-- View: Mis Notas -->
@@ -585,7 +669,10 @@ const db = firebase.database();
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwO0eaNo7KKw93lg9FuhgSG8g_mata2GApkMyrBSc3XKRojD3-N-Dvcb6qfNeK0xt_n/exec';
 
 // ============= DATA =============
-const TEAM = [
+// Estos son solo los valores por defecto (semilla). Al cargar, la app sincroniza
+// el equipo con Firebase ('team/'), así que ediciones, cambios de clave y
+// restablecimientos quedan guardados de verdad y no se pierden al recargar.
+let TEAM = [
   { id: 'danilo',   name: 'Danilo Gallegos',  role: 'admin',  phone: '+56984701093', email: 'danilo.gallegos@urbancomercial.cl', pass: 'urban2026', mustChange: false, color: { bg: '#1a1a1a', fg: '#FFD100' } },
   { id: 'jose',     name: 'Jose',             role: 'admin',  phone: '+56973056119', email: 'jsoto@urbancomercial.cl',           pass: 'urban2026', mustChange: true,  color: { bg: '#F5C4B3', fg: '#712B13' } },
   { id: 'raquel',   name: 'Raquel',           role: 'editor', phone: '+56934115995', email: 'postventas@urbancomercial.cl',      pass: 'urban2026', mustChange: true,  color: { bg: '#C5E8DA', fg: '#1a5d44' } },
@@ -596,12 +683,14 @@ const TEAM = [
   { id: 'patricio', name: 'Patricio',         role: 'editor', phone: '+56975175322', email: 'bodega@urbancomercial.cl',          pass: 'urban2026', mustChange: true,  color: { bg: '#9FE1CB', fg: '#085041' } },
   { id: 'romina',   name: 'Romina',           role: 'editor', phone: '+56957797718', email: 'rquezada@urbancomercial.cl',        pass: 'urban2026', mustChange: true,  color: { bg: '#F0997B', fg: '#4A1B0C' } }
 ];
+const TEAM_SEED_DEFAULT = TEAM;
+let TEAM_READY = false;
 
 const STATUSES = [
-  { id: 'pendiente', label: 'Pendiente', class: 'pendiente', color: '#888' },
+  { id: 'pendiente', label: 'Pendiente', class: 'pendiente', color: '#666663' },
   { id: 'curso',     label: 'En curso',  class: 'curso',     color: '#FFD100' },
-  { id: 'revision',  label: 'En revisión', class: 'revision', color: '#7F77DD' },
-  { id: 'completada', label: 'Completada', class: 'completada', color: '#1a9e75' }
+  { id: 'revision',  label: 'En revisión', class: 'revision', color: '#6b62d6' },
+  { id: 'completada', label: 'Completada', class: 'completada', color: '#178064' }
 ];
 
 const PRIORITIES = [
@@ -620,12 +709,21 @@ let CURRENT_USER = null;
 let currentView = 'tasks';
 let filterStatus = 'todas';
 let groupBy = 'estado';
-let currentMonth = new Date(2026, 5, 17);
-let selectedCalDay = '2026-06-17';
+const _todayBoot = new Date();
+let currentMonth = new Date(_todayBoot.getFullYear(), _todayBoot.getMonth(), 1);
+let selectedCalDay = todayISO();
 let expandedTasks = new Set();
 
 // ============= HELPERS =============
-function getUser(id) { return TEAM.find(u => u.id === id); }
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}-${d.getDate().toString().padStart(2,'0')}`;
+}
+function isOverdue(t) {
+  return !!t.dueDate && t.status !== 'completada' && t.dueDate < todayISO();
+}
+const DELETED_USER_PLACEHOLDER = { id: '_desconocido', name: 'Usuario eliminado', role: 'editor', phone: '', email: '', pass: '', mustChange: false, color: { bg: '#e0e0dc', fg: '#666663' } };
+function getUser(id) { return TEAM.find(u => u.id === id) || DELETED_USER_PLACEHOLDER; }
 function getInitials(name) { return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(); }
 function getStatus(id) { return STATUSES.find(s => s.id === id); }
 function getPriority(id) { return PRIORITIES.find(p => p.id === id); }
@@ -658,6 +756,24 @@ function avatarHTML(user, size) {
   return `<div class="avatar" style="${style}">${getInitials(user.name)}</div>`;
 }
 
+// Grupo de "pills" accesible: radios reales ocultos + <label> con la apariencia de pill,
+// para que sean operables con teclado y lectores de pantalla (a diferencia de <div onclick>).
+function pillRadioGroup(name, items, selectedVal, pillClassFn) {
+  return `<div class="pill-row" id="${name}">` + items.map(it => {
+    const inputId = `${name}_${it.id}`;
+    const extraClass = pillClassFn ? pillClassFn(it.id) : '';
+    return `<input type="radio" id="${inputId}" name="${name}" value="${it.id}" ${it.id===selectedVal?'checked':''}>` +
+           `<label class="pill ${extraClass}" for="${inputId}">${it.label}</label>`;
+  }).join('') + `</div>`;
+}
+function pillGroupValue(name) {
+  const el = document.querySelector(`input[name="${name}"]:checked`);
+  return el ? el.value : null;
+}
+function toggleInputHTML(id, checked, onchange) {
+  return `<input type="checkbox" class="toggle" id="${id}" ${checked ? 'checked' : ''} ${onchange ? `onchange="${onchange}"` : ''}>`;
+}
+
 // Permisos
 function canSeeTask(task, user) {
   if (task.private) return task.creador === user.id || task.responsable === user.id;
@@ -677,8 +793,55 @@ function isAdminView() {
   return CURRENT_USER.id === 'danilo' || CURRENT_USER.id === 'jose';
 }
 
+// ============= EQUIPO (Firebase) =============
+// Carga el equipo desde Firebase antes de mostrar el login. Si es la primera vez
+// que corre (no hay datos en 'team/'), siembra Firebase con los valores por defecto.
+function bootTeam() {
+  db.ref('team').once('value').then(snap => {
+    if (snap.exists()) {
+      TEAM = Object.values(snap.val());
+    } else {
+      const seed = {};
+      TEAM_SEED_DEFAULT.forEach(u => seed[u.id] = u);
+      db.ref('team').set(seed);
+    }
+    TEAM_READY = true;
+    document.getElementById('bootLoading').classList.add('hidden');
+    document.getElementById('loginScreen').classList.remove('hidden');
+
+    // Mantiene el equipo sincronizado en vivo (ediciones, resets de clave, etc.)
+    db.ref('team').on('value', s => {
+      if (!s.exists()) return;
+      TEAM = Object.values(s.val());
+      if (CURRENT_USER) {
+        CURRENT_USER = getUser(CURRENT_USER.id);
+        if (document.getElementById('app') && !document.getElementById('app').classList.contains('hidden')) {
+          renderTasks(); renderFilterChips();
+          if (currentView === 'settings') renderSettings();
+        }
+      }
+    });
+
+    maybeAutoOpenSharedTask();
+  }).catch(() => {
+    // Si Firebase no responde, seguimos con los valores por defecto para no dejar
+    // a nadie sin poder entrar.
+    TEAM_READY = true;
+    document.getElementById('bootLoading').classList.add('hidden');
+    document.getElementById('loginScreen').classList.remove('hidden');
+  });
+}
+
+function persistTeam() {
+  const map = {};
+  TEAM.forEach(u => map[u.id] = u);
+  db.ref('team').set(map);
+}
+
 // ============= LOGIN =============
-function doLogin() {
+function doLogin(evt) {
+  if (evt) evt.preventDefault();
+  if (!TEAM_READY) return false;
   const user = document.getElementById('loginUser').value.trim().toLowerCase();
   const pass = document.getElementById('loginPass').value;
   const errEl = document.getElementById('loginError');
@@ -688,7 +851,7 @@ function doLogin() {
   if (!u || u.pass !== pass) {
     errEl.textContent = 'Usuario o contraseña incorrectos';
     errEl.classList.remove('hidden');
-    return;
+    return false;
   }
   CURRENT_USER = u;
   document.getElementById('loginScreen').classList.add('hidden');
@@ -698,6 +861,7 @@ function doLogin() {
   if (u.mustChange) {
     setTimeout(() => openChangePassModal(true), 300);
   }
+  return false;
 }
 
 function doLogout() {
@@ -707,6 +871,28 @@ function doLogout() {
   document.getElementById('loginScreen').classList.remove('hidden');
   document.getElementById('loginUser').value = '';
   document.getElementById('loginPass').value = '';
+}
+
+// ============= DEEP LINK (?t=id compartido por WhatsApp/Email) =============
+function maybeAutoOpenSharedTask() {
+  const params = new URLSearchParams(window.location.search);
+  const sharedId = params.get('t');
+  if (!sharedId) return;
+  const tryOpen = () => {
+    if (!CURRENT_USER) return;
+    const id = Number(sharedId);
+    const t = TASKS.find(x => x.id === id);
+    if (t && canSeeTask(t, CURRENT_USER)) {
+      openTaskDetail(id);
+    } else if (t) {
+      toast('No tienes acceso a esa tarea');
+    }
+    history.replaceState({}, '', window.location.pathname);
+  };
+  const check = setInterval(() => {
+    if (CURRENT_USER && TASKS.length) { clearInterval(check); tryOpen(); }
+  }, 400);
+  setTimeout(() => clearInterval(check), 15000);
 }
 
 // ============= INIT =============
@@ -775,16 +961,18 @@ function renderFilterChips() {
   const mias = visible.filter(t => t.responsable === CURRENT_USER.id).length;
   const pend = visible.filter(t => t.status === 'pendiente').length;
   const alta = visible.filter(t => t.priority === 'alta' && t.status !== 'completada').length;
+  const vencidas = visible.filter(isOverdue).length;
 
   const chips = [
     { id: 'todas',   label: `Todas · ${total}` },
     { id: 'mias',    label: `Mías · ${mias}` },
     { id: 'pendientes', label: `Pendientes · ${pend}` },
-    { id: 'alta',    label: `Alta` }
+    { id: 'alta',    label: `Alta` },
+    { id: 'vencidas', label: `Vencidas${vencidas ? ' · ' + vencidas : ''}` }
   ];
 
   document.getElementById('filterChips').innerHTML = chips.map(c =>
-    `<div class="chip ${c.id === filterStatus ? 'active' : ''}" onclick="setFilter('${c.id}')">${c.label}</div>`
+    `<div class="chip ${c.id === filterStatus ? 'active' : ''}" role="button" tabindex="0" aria-pressed="${c.id === filterStatus}" onclick="setFilter('${c.id}')">${c.label}</div>`
   ).join('');
 }
 
@@ -808,7 +996,9 @@ function applyFilters(tasks) {
   if (filterStatus === 'mias') r = r.filter(t => t.responsable === CURRENT_USER.id);
   else if (filterStatus === 'pendientes') r = r.filter(t => t.status === 'pendiente');
   else if (filterStatus === 'alta') r = r.filter(t => t.priority === 'alta' && t.status !== 'completada');
-  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  else if (filterStatus === 'vencidas') r = r.filter(isOverdue);
+  const searchEl = document.getElementById('searchInput');
+  const q = searchEl ? searchEl.value.trim().toLowerCase() : '';
   if (q) {
     r = r.filter(t =>
       t.title.toLowerCase().includes(q) ||
@@ -848,13 +1038,13 @@ function renderTasks() {
       const curso = tasks.filter(t => t.status === 'curso').length;
       const meta = [`${tasks.length} tareas`, alta ? `${alta} alta` : null, curso ? `${curso} en curso` : null].filter(Boolean).join(' · ');
       html += `
-        <div class="group-header" onclick="toggleGroup('${u.id}')">
+        <div class="group-header" onclick="toggleGroup('${u.id}')" role="button" tabindex="0" aria-expanded="true" aria-controls="groupTasks_${u.id}">
           ${avatarHTML(u)}
           <div class="group-header-info">
             <div class="group-header-name">${u.name}</div>
             <div class="group-header-meta">${meta}</div>
           </div>
-          <i class="ti ti-chevron-down task-chevron" id="groupChev_${u.id}"></i>
+          <i class="ti ti-chevron-down task-chevron" id="groupChev_${u.id}" aria-hidden="true"></i>
         </div>
         <div id="groupTasks_${u.id}" style="margin-left: 8px; padding-left: 8px; border-left: 2px solid ${u.color.bg}; margin-bottom: 12px;">
           ${tasks.map(taskCardHTML).join('')}
@@ -880,14 +1070,17 @@ function renderTasks() {
 function toggleGroup(uid) {
   const el = document.getElementById(`groupTasks_${uid}`);
   const chev = document.getElementById(`groupChev_${uid}`);
+  const header = chev.closest('.group-header');
   if (el.style.display === 'none') {
     el.style.display = '';
     chev.classList.remove('ti-chevron-down');
     chev.classList.add('ti-chevron-up');
+    if (header) header.setAttribute('aria-expanded', 'true');
   } else {
     el.style.display = 'none';
     chev.classList.remove('ti-chevron-up');
     chev.classList.add('ti-chevron-down');
+    if (header) header.setAttribute('aria-expanded', 'false');
   }
 }
 
@@ -895,21 +1088,24 @@ function taskCardHTML(t) {
   const resp = getUser(t.responsable);
   const status = getStatus(t.status);
   const isExpanded = expandedTasks.has(t.id);
+  const overdue = isOverdue(t);
   return `
-    <div class="task-card ${t.status} ${isExpanded ? 'expanded' : ''}" onclick="toggleTask(${t.id})">
-      <div class="task-row">
-        <div class="task-info">
-          <div class="task-title">${escapeHtml(t.title)}${t.sentToGCal ? ' <span class="badge-cal" style="background:rgba(66,133,244,0.15);color:#4285F4;padding:2px 6px;border-radius:5px;font-size:9px;font-weight:500;display:inline-flex;align-items:center;gap:3px;"><i class="ti ti-brand-google" style="font-size:10px;"></i>Cal</span>' : ''}${t.private ? ' <span class="badge-private">Privada</span>' : ''}</div>
-          <div class="task-meta">
-            <span class="meta-item">${avatarHTML(resp,'mini')} ${escapeHtml(resp.name.split(' ')[0])}</span>
-            <span class="sep">·</span>
-            <span class="${t.priority}">${getPriority(t.priority).label}</span>
-            ${t.dueDate ? `<span class="sep">·</span><span class="meta-item"><i class="ti ti-calendar" style="font-size:10px;"></i>${formatDate(t.dueDate)}</span>` : ''}
+    <div class="task-card ${t.status} ${isExpanded ? 'expanded' : ''}">
+      <button type="button" class="task-row-btn" onclick="toggleTask(${t.id})" aria-expanded="${isExpanded}" aria-label="${escapeHtml(t.title)}, ${overdue ? 'vencida, ' : ''}${escapeHtml(status.label)}">
+        <div class="task-row">
+          <div class="task-info">
+            <div class="task-title">${escapeHtml(t.title)}${t.sentToGCal ? ' <span class="badge-cal"><i class="ti ti-brand-google" aria-hidden="true"></i>Cal</span>' : ''}${t.private ? ' <span class="badge-private">Privada</span>' : ''}${overdue ? ' <span class="badge-overdue"><i class="ti ti-alert-triangle" aria-hidden="true"></i>Vencida</span>' : ''}</div>
+            <div class="task-meta">
+              <span class="meta-item">${avatarHTML(resp,'mini')} ${escapeHtml(resp.name.split(' ')[0])}</span>
+              <span class="sep">·</span>
+              <span class="${t.priority}">${getPriority(t.priority).label}</span>
+              ${t.dueDate ? `<span class="sep">·</span><span class="meta-item ${overdue ? 'overdue' : ''}"><i class="ti ti-calendar" aria-hidden="true"></i>${formatDate(t.dueDate)}</span>` : ''}
+            </div>
           </div>
+          <i class="ti ti-chevron-down task-chevron" aria-hidden="true"></i>
         </div>
-        <i class="ti ti-chevron-down task-chevron"></i>
-      </div>
-      <div class="task-expanded" onclick="event.stopPropagation()">
+      </button>
+      <div class="task-expanded">
         ${t.desc ? `<div class="task-desc">${escapeHtml(t.desc)}</div>` : ''}
         ${t.tags.length ? `<div class="task-tags">${t.tags.map(tag => `<span class="tag">#${escapeHtml(tag)}</span>`).join('')}</div>` : ''}
         <div class="task-stamps">
@@ -962,6 +1158,13 @@ function changeMonth(delta) {
   renderCalendar();
 }
 
+function goToToday() {
+  const t = new Date();
+  currentMonth = new Date(t.getFullYear(), t.getMonth(), 1);
+  selectedCalDay = todayISO();
+  renderCalendar();
+}
+
 function renderCalendar() {
   const y = currentMonth.getFullYear();
   const m = currentMonth.getMonth();
@@ -972,8 +1175,7 @@ function renderCalendar() {
   const first = new Date(y, m, 1);
   const last = new Date(y, m + 1, 0);
   const firstDay = (first.getDay() + 6) % 7;
-  const today = new Date();
-  const todayStr = today.toISOString().slice(0,10);
+  const todayStr = todayISO();
 
   const visible = getVisibleTasks();
   const tasksByDate = {};
@@ -994,7 +1196,7 @@ function renderCalendar() {
     const isToday = dateStr === todayStr;
     const isSelected = dateStr === selectedCalDay;
     const dots = [...new Set(tasks.map(t => t.priority))].slice(0,3);
-    html += `<div class="cal-day ${isToday?'today':''} ${isSelected?'selected':''}" onclick="selectCalDay('${dateStr}')">${d}
+    html += `<div class="cal-day ${isToday?'today':''} ${isSelected?'selected':''}" onclick="selectCalDay('${dateStr}')" role="button" tabindex="0" ${isToday ? 'aria-current="date"' : ''} aria-label="${d} de ${monthNames[m]}${tasks.length ? ', ' + tasks.length + ' tarea' + (tasks.length>1?'s':'') : ''}">${d}
       ${dots.length ? `<div class="dots">${dots.map(p => `<div class="dot dot-${p}"></div>`).join('')}</div>` : ''}
     </div>`;
   }
@@ -1008,7 +1210,7 @@ function selectCalDay(dateStr) {
 }
 
 function renderCalDayTasks() {
-  const visible = getVisibleTasks();
+  const visible = applyFilters(getVisibleTasks());
   const tasks = visible.filter(t => t.createdAt.slice(0,10) === selectedCalDay || t.dueDate === selectedCalDay);
   const d = new Date(selectedCalDay + 'T00:00:00');
   const label = `${d.getDate()} ${['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][d.getMonth()]}`;
@@ -1018,9 +1220,10 @@ function renderCalDayTasks() {
   } else {
     tasks.forEach(t => {
       const isDue = t.dueDate === selectedCalDay;
+      const overdue = isOverdue(t);
       const resp = getUser(t.responsable);
       html += `
-        <div class="task-card ${t.status}" onclick="openTaskDetail(${t.id})">
+        <div class="task-card ${t.status}" onclick="openTaskDetail(${t.id})" role="button" tabindex="0" aria-label="${escapeHtml(t.title)}">
           <div class="task-info">
             <div class="task-title">${escapeHtml(t.title)}</div>
             <div class="task-meta">
@@ -1029,7 +1232,7 @@ function renderCalDayTasks() {
               <span class="${t.priority}">${getPriority(t.priority).label}</span>
               <span class="sep">·</span>
               <span>${getStatus(t.status).label}</span>
-              ${isDue ? `<span class="sep">·</span><span style="color:var(--red);">Vence hoy</span>` : ''}
+              ${isDue ? `<span class="sep">·</span><span class="${overdue ? 'overdue' : ''}" style="${overdue ? '' : 'color:var(--red);'}">${overdue ? 'Vencida' : 'Vence hoy'}</span>` : ''}
             </div>
           </div>
         </div>`;
@@ -1039,12 +1242,16 @@ function renderCalDayTasks() {
 }
 
 // ============= KANBAN =============
+// Soporta arrastrar y soltar entre columnas (mouse/touch) y, para que sea 100%
+// operable por teclado, cada tarjeta también trae un <select> nativo de estado.
+let dragTaskId = null;
+
 function renderKanban() {
-  const visible = getVisibleTasks();
+  const visible = applyFilters(getVisibleTasks());
   let html = '';
   STATUSES.forEach(s => {
     const tasks = visible.filter(t => t.status === s.id);
-    html += `<div class="kanban-col">
+    html += `<div class="kanban-col" data-status="${s.id}" ondragover="kanbanDragOver(event)" ondragleave="kanbanDragLeave(event)" ondrop="kanbanDrop(event,'${s.id}')">
       <div class="kanban-col-header">
         <div class="kanban-col-title">
           <div class="dot" style="background:${s.color};"></div>
@@ -1054,18 +1261,61 @@ function renderKanban() {
       </div>
       ${tasks.map(t => {
         const resp = getUser(t.responsable);
-        return `<div class="kanban-card ${t.status}" onclick="openTaskDetail(${t.id})">
-          <div class="kanban-card-title">${escapeHtml(t.title)}</div>
+        const overdue = isOverdue(t);
+        return `<div class="kanban-card ${t.status}" draggable="true" ondragstart="kanbanDragStart(event,${t.id})" ondragend="kanbanDragEnd(event)" onclick="openTaskDetail(${t.id})">
+          <div class="kanban-card-title">${escapeHtml(t.title)}${overdue ? ' <span class="badge-overdue">Vencida</span>' : ''}</div>
           ${t.tags.length ? `<div class="kanban-card-tags">${t.tags.slice(0,2).map(tag => `<span class="kanban-card-tag">#${escapeHtml(tag)}</span>`).join('')}</div>` : ''}
           <div class="kanban-card-bottom">
             <span class="mini-avatar" style="background:${resp.color.bg};color:${resp.color.fg};">${getInitials(resp.name)}</span>
-            <span style="font-size:10px;color:${t.priority==='alta'?'var(--red)':t.priority==='media'?'var(--amber)':'var(--gray-500)'};font-weight:500;">${getPriority(t.priority).label}</span>
+            <span style="font-size:10px;color:${t.priority==='alta'?'var(--red)':t.priority==='media'?'var(--amber-strong)':'var(--gray-500)'};font-weight:500;">${getPriority(t.priority).label}</span>
+            <button type="button" class="kanban-card-detail-btn" onclick="event.stopPropagation();openTaskDetail(${t.id})" aria-label="Ver detalle de ${escapeHtml(t.title)}"><i class="ti ti-eye" aria-hidden="true"></i></button>
           </div>
+          <label class="sr-only" for="kanbanMove_${t.id}">Cambiar estado de "${escapeHtml(t.title)}"</label>
+          <select id="kanbanMove_${t.id}" class="kanban-card-move" onclick="event.stopPropagation()" onchange="event.stopPropagation();moveTaskToStatus(${t.id}, this.value)">
+            ${STATUSES.map(st => `<option value="${st.id}" ${st.id===t.status?'selected':''}>${st.label}</option>`).join('')}
+          </select>
         </div>`;
       }).join('') || `<div style="font-size:11px;color:var(--gray-300);padding:12px;text-align:center;">Sin tareas</div>`}
     </div>`;
   });
   document.getElementById('kanbanContainer').innerHTML = html;
+}
+
+function kanbanDragStart(e, id) {
+  dragTaskId = id;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', String(id));
+  e.target.classList.add('dragging');
+}
+function kanbanDragEnd(e) {
+  e.target.classList.remove('dragging');
+  document.querySelectorAll('.kanban-col.drag-over').forEach(c => c.classList.remove('drag-over'));
+}
+function kanbanDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('drag-over');
+}
+function kanbanDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+function kanbanDrop(e, newStatus) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  const id = dragTaskId || Number(e.dataTransfer.getData('text/plain'));
+  if (id) moveTaskToStatus(id, newStatus);
+  dragTaskId = null;
+}
+
+function moveTaskToStatus(id, newStatus) {
+  const t = TASKS.find(x => x.id === id);
+  if (!t || t.status === newStatus) return;
+  t.status = newStatus;
+  t.updatedAt = new Date().toISOString();
+  db.ref('tareas/' + id).update({ status: newStatus, updatedAt: t.updatedAt });
+  toast(`Movida a "${getStatus(newStatus).label}"`);
+  renderFilterChips();
+  renderKanban();
+  if (currentView === 'tasks') renderTasks();
 }
 
 // ============= MODAL HELPERS =============
@@ -1101,37 +1351,33 @@ function openTaskFormModal(taskId) {
 
     <div class="form-card">
       <div class="form-row">
-        <div class="form-label">Responsable</div>
+        <label class="form-label" for="taskResp">Responsable</label>
         <select class="form-input" id="taskResp">
           ${TEAM.map(u => `<option value="${u.id}" ${t && t.responsable===u.id ? 'selected' : (!t && u.id===CURRENT_USER.id ? 'selected' : '')}>${u.name}</option>`).join('')}
         </select>
       </div>
       <div class="form-row">
-        <div class="form-label">Prioridad</div>
-        <div class="pill-row" id="taskPriority">
-          ${PRIORITIES.map(p => `<div class="pill pill-status-${p.id} ${(t?t.priority:'media')===p.id?'active':''}" data-val="${p.id}" onclick="selectPill(this, 'taskPriority')">${p.label}</div>`).join('')}
-        </div>
+        <div class="form-label" id="taskPriorityLabel">Prioridad</div>
+        ${pillRadioGroup('taskPriority', PRIORITIES, t ? t.priority : 'media', id => `pill-status-${id}`)}
       </div>
       <div class="form-row">
-        <div class="form-label">Estado</div>
-        <div class="pill-row" id="taskStatus">
-          ${STATUSES.map(s => `<div class="pill ${(t?t.status:'pendiente')===s.id?'active':''}" data-val="${s.id}" onclick="selectPill(this, 'taskStatus')">${s.label}</div>`).join('')}
-        </div>
+        <div class="form-label" id="taskStatusLabel">Estado</div>
+        ${pillRadioGroup('taskStatus', STATUSES, t ? t.status : 'pendiente')}
       </div>
       <div class="form-row">
-        <div class="form-label">Vencimiento (opcional)</div>
+        <label class="form-label" for="taskDue">Vencimiento (opcional)</label>
         <input type="date" class="form-input" id="taskDue" value="${t && t.dueDate ? t.dueDate : ''}">
       </div>
       <div class="form-row">
-        <div class="form-label">Tags (separados por coma)</div>
+        <label class="form-label" for="taskTags">Tags (separados por coma)</label>
         <input type="text" class="form-input" id="taskTags" placeholder="mercadolibre, campaña, urgente" value="${t ? t.tags.join(', ') : ''}">
       </div>
       <div class="form-row" style="display:flex;justify-content:space-between;align-items:center;">
-        <div>
+        <label for="taskPrivate">
           <div style="font-size:13px;font-weight:500;">Tarea privada</div>
           <div style="font-size:11px;color:var(--gray-500);">Solo visible para ti y el responsable</div>
-        </div>
-        <div class="toggle ${t && t.private ? 'on' : ''}" id="taskPrivate" onclick="this.classList.toggle('on')"></div>
+        </label>
+        ${toggleInputHTML('taskPrivate', t && t.private)}
       </div>
     </div>
 
@@ -1140,21 +1386,16 @@ function openTaskFormModal(taskId) {
   `);
 }
 
-function selectPill(el, group) {
-  document.querySelectorAll(`#${group} .pill`).forEach(p => p.classList.remove('active'));
-  el.classList.add('active');
-}
-
 function saveTask(id) {
   const title = document.getElementById('taskTitle').value.trim();
   if (!title) { toast('Falta el título'); return; }
   const desc = document.getElementById('taskDesc').value.trim();
   const responsable = document.getElementById('taskResp').value;
-  const priority = document.querySelector('#taskPriority .pill.active')?.dataset.val || 'media';
-  const status = document.querySelector('#taskStatus .pill.active')?.dataset.val || 'pendiente';
+  const priority = pillGroupValue('taskPriority') || 'media';
+  const status = pillGroupValue('taskStatus') || 'pendiente';
   const dueDate = document.getElementById('taskDue').value || null;
   const tags = document.getElementById('taskTags').value.split(',').map(s => s.trim().replace(/^#/,'')).filter(Boolean);
-  const isPrivate = document.getElementById('taskPrivate').classList.contains('on');
+  const isPrivate = document.getElementById('taskPrivate').checked;
   const now = new Date().toISOString();
 
   if (id) {
@@ -1194,47 +1435,49 @@ function openTaskDetail(id) {
   if (!t) return;
   const resp = getUser(t.responsable);
   const creador = getUser(t.creador);
+  const overdue = isOverdue(t);
   showModal(`
     <div class="modal-header">
-      <button class="modal-close" onclick="closeModal()"><i class="ti ti-arrow-left"></i></button>
-      <div style="display:flex;gap:6px;">
-        <button class="modal-close" onclick="openTaskFormModal(${t.id})"><i class="ti ti-edit"></i></button>
+      <button class="modal-close" onclick="closeModal()" aria-label="Volver"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+      <div class="icon-btn-row">
+        <button class="modal-close" onclick="openTaskFormModal(${t.id})" aria-label="Editar tarea"><i class="ti ti-edit" aria-hidden="true"></i></button>
       </div>
     </div>
 
     <div style="margin-bottom:16px;">
-      <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
-        <span style="background:var(--black);color:var(--yellow);padding:4px 10px;border-radius:8px;font-size:11px;font-weight:500;">${getStatus(t.status).label}</span>
-        <span style="background:${t.priority==='alta'?'rgba(201,54,54,0.15)':t.priority==='media'?'rgba(176,112,0,0.15)':'var(--gray-50)'};color:${t.priority==='alta'?'var(--red)':t.priority==='media'?'var(--amber)':'var(--gray-500)'};padding:4px 10px;border-radius:8px;font-size:11px;font-weight:500;">${getPriority(t.priority).label}</span>
-        ${t.private ? `<span style="background:rgba(127,119,221,0.15);color:var(--purple);padding:4px 10px;border-radius:8px;font-size:11px;font-weight:500;">Privada</span>` : ''}
+      <div class="badge-row">
+        <span class="status-badge">${getStatus(t.status).label}</span>
+        <span class="priority-badge ${t.priority}">${getPriority(t.priority).label}</span>
+        ${t.private ? `<span class="private-badge">Privada</span>` : ''}
+        ${overdue ? `<span class="badge-overdue">Vencida</span>` : ''}
       </div>
-      <h2 style="font-size:20px;font-weight:500;letter-spacing:-0.3px;line-height:1.3;margin-bottom:8px;">${escapeHtml(t.title)}</h2>
-      ${t.desc ? `<p style="font-size:13px;color:var(--gray-700);line-height:1.5;">${escapeHtml(t.desc)}</p>` : ''}
+      <h2 class="detail-title">${escapeHtml(t.title)}</h2>
+      ${t.desc ? `<p class="detail-desc">${escapeHtml(t.desc)}</p>` : ''}
     </div>
 
     <div class="form-card">
-      <div class="form-row" style="display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:12px;color:var(--gray-500);"><i class="ti ti-user"></i> Responsable</span>
+      <div class="form-row detail-row">
+        <span class="k"><i class="ti ti-user" aria-hidden="true"></i> Responsable</span>
         <div style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;">
           ${avatarHTML(resp,'mini')} ${escapeHtml(resp.name)}
         </div>
       </div>
-      ${t.dueDate ? `<div class="form-row" style="display:flex;justify-content:space-between;"><span style="font-size:12px;color:var(--gray-500);"><i class="ti ti-calendar"></i> Vence</span><span style="font-size:13px;">${formatDate(t.dueDate)}</span></div>` : ''}
-      <div class="form-row" style="display:flex;justify-content:space-between;">
-        <span style="font-size:12px;color:var(--gray-500);"><i class="ti ti-clock"></i> Creada</span>
-        <span style="font-size:13px;color:var(--gray-500);">${formatDate(t.createdAt)} · ${escapeHtml(creador.name.split(' ')[0])}</span>
+      ${t.dueDate ? `<div class="form-row detail-row"><span class="k"><i class="ti ti-calendar" aria-hidden="true"></i> Vence</span><span class="v ${overdue ? 'overdue' : ''}">${formatDate(t.dueDate)}${overdue ? ' · Vencida' : ''}</span></div>` : ''}
+      <div class="form-row detail-row">
+        <span class="k"><i class="ti ti-clock" aria-hidden="true"></i> Creada</span>
+        <span class="v" style="color:var(--gray-500);">${formatDate(t.createdAt)} · ${escapeHtml(creador.name.split(' ')[0])}</span>
       </div>
-      ${t.tags.length ? `<div class="form-row" style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;color:var(--gray-500);"><i class="ti ti-hash"></i> Tags</span><div style="display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end;">${t.tags.map(tag => `<span class="tag">#${escapeHtml(tag)}</span>`).join('')}</div></div>` : ''}
+      ${t.tags.length ? `<div class="form-row detail-row"><span class="k"><i class="ti ti-hash" aria-hidden="true"></i> Tags</span><div style="display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end;">${t.tags.map(tag => `<span class="tag">#${escapeHtml(tag)}</span>`).join('')}</div></div>` : ''}
     </div>
 
     <div class="btn-row" style="margin-top:12px;">
-      <button class="btn-primary" onclick="openSendModal(${t.id})"><i class="ti ti-send"></i> Enviar</button>
-      <button class="btn-secondary" onclick="addToCalendar(${t.id})"><i class="ti ti-calendar-plus"></i> Agenda</button>
+      <button class="btn-primary" onclick="openSendModal(${t.id})"><i class="ti ti-send" aria-hidden="true"></i> Enviar</button>
+      <button class="btn-secondary" onclick="addToCalendar(${t.id})"><i class="ti ti-calendar-plus" aria-hidden="true"></i> Agenda</button>
     </div>
 
     ${CURRENT_USER.id === 'danilo' ? `
       <button class="btn-outline" style="margin-top:8px;" onclick="sendToGoogleCalendar(${t.id})">
-        <i class="ti ti-brand-google" style="color:#4285F4;"></i>
+        <i class="ti ti-brand-google" style="color:#4285F4;" aria-hidden="true"></i>
         ${t.sentToGCal ? 'Ya enviada a Google Calendar' : 'Enviar a mi Google Calendar'}
       </button>
     ` : ''}
@@ -1261,8 +1504,9 @@ function openTaskDetail(id) {
         }).join('')}
       </div>
       <div class="comment-input-wrap">
+        <label class="sr-only" for="newCommentText">Agregar comentario</label>
         <textarea class="comment-textarea" id="newCommentText" placeholder="Agregar comentario..."></textarea>
-        <button class="comment-send" onclick="addComment(${t.id})"><i class="ti ti-send"></i></button>
+        <button class="comment-send" onclick="addComment(${t.id})" aria-label="Enviar comentario"><i class="ti ti-send" aria-hidden="true"></i></button>
       </div>
     </div>
   `);
@@ -1290,27 +1534,27 @@ function addToCalendar(id) {
         <div class="modal-subtitle">Agenda del equipo</div>
         <div class="modal-title">Crear evento compartido</div>
       </div>
-      <button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>
+      <button class="modal-close" onclick="closeModal()" aria-label="Cerrar"><i class="ti ti-x" aria-hidden="true"></i></button>
     </div>
     <div class="info-banner" style="margin-bottom:12px;">
-      <i class="ti ti-info-circle"></i>
+      <i class="ti ti-info-circle" aria-hidden="true"></i>
       <div class="info-banner-text">Se creará en el calendario de <b>urbantareas@gmail.com</b>, visible para todo el equipo.</div>
     </div>
     <div class="form-card">
       <div class="form-row">
-        <div class="form-label">Título del evento</div>
+        <label class="form-label" for="gcTitle">Título del evento</label>
         <input type="text" class="form-input" id="gcTitle" value="${escapeHtml(t.title)}">
       </div>
       <div class="form-row">
-        <div class="form-label">Fecha</div>
-        <input type="date" class="form-input" id="gcDate" value="${t.dueDate || new Date().toISOString().slice(0,10)}">
+        <label class="form-label" for="gcDate">Fecha</label>
+        <input type="date" class="form-input" id="gcDate" value="${t.dueDate || todayISO()}">
       </div>
       <div class="form-row">
-        <div class="form-label">Hora</div>
+        <label class="form-label" for="gcTime">Hora</label>
         <input type="time" class="form-input" id="gcTime" value="10:00">
       </div>
       <div class="form-row">
-        <div class="form-label">Recordatorio</div>
+        <label class="form-label" for="gcReminder">Recordatorio</label>
         <select class="form-input" id="gcReminder">
           <option value="15">15 minutos antes</option>
           <option value="60">1 hora antes</option>
@@ -1369,7 +1613,7 @@ function sendToGoogleCalendar(id) {
   const t = TASKS.find(x => x.id === id);
   const title = encodeURIComponent(t.title);
   const desc = encodeURIComponent((t.desc || '') + '\n\nCreado desde Urban Tasks');
-  const date = (t.dueDate || new Date().toISOString().slice(0,10)).replace(/-/g, '');
+  const date = (t.dueDate || todayISO()).replace(/-/g, '');
   const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${date}T100000/${date}T110000&details=${desc}&location=${encodeURIComponent('Urban Comercial — Sta. Elena de Huechuraba 1701')}`;
   
   t.sentToGCal = true;
@@ -1393,40 +1637,45 @@ function openSendModal(id) {
         <div class="modal-subtitle">Enviar a ${escapeHtml(resp.name.split(' ')[0])}</div>
         <div class="modal-title">¿Por dónde?</div>
       </div>
-      <button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>
+      <button class="modal-close" onclick="closeModal()" aria-label="Cerrar"><i class="ti ti-x" aria-hidden="true"></i></button>
     </div>
 
-    <div class="channel-option selected" id="chanWsp" onclick="this.classList.toggle('selected')">
+    <div class="channel-option selected" id="chanWsp" role="checkbox" aria-checked="true" tabindex="0" onclick="toggleChannel(this)">
       <div class="channel-option-row">
-        <div class="channel-icon wsp"><i class="ti ti-brand-whatsapp"></i></div>
+        <div class="channel-icon wsp"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i></div>
         <div class="channel-info">
           <div class="channel-name">WhatsApp</div>
           <div class="channel-detail">${resp.phone}</div>
         </div>
-        <div class="channel-check"></div>
+        <div class="channel-check" aria-hidden="true"></div>
       </div>
       <div class="channel-desc">Mensaje con detalle + link a la tarea</div>
     </div>
 
-    <div class="channel-option" id="chanEmail" onclick="this.classList.toggle('selected')">
+    <div class="channel-option" id="chanEmail" role="checkbox" aria-checked="false" tabindex="0" onclick="toggleChannel(this)">
       <div class="channel-option-row">
-        <div class="channel-icon email"><i class="ti ti-mail"></i></div>
+        <div class="channel-icon email"><i class="ti ti-mail" aria-hidden="true"></i></div>
         <div class="channel-info">
           <div class="channel-name">Email</div>
           <div class="channel-detail">${resp.email}</div>
         </div>
-        <div class="channel-check"></div>
+        <div class="channel-check" aria-hidden="true"></div>
       </div>
       <div class="channel-desc">Correo con detalle completo de la tarea</div>
     </div>
 
     <div class="info-banner">
-      <i class="ti ti-info-circle"></i>
+      <i class="ti ti-info-circle" aria-hidden="true"></i>
       <div class="info-banner-text">Puedes seleccionar uno o ambos canales.</div>
     </div>
 
     <button class="btn-primary" onclick="confirmSend(${id})">Enviar ahora</button>
   `);
+}
+
+function toggleChannel(el) {
+  el.classList.toggle('selected');
+  el.setAttribute('aria-checked', el.classList.contains('selected') ? 'true' : 'false');
 }
 
 function confirmSend(id) {
@@ -1477,14 +1726,14 @@ function renderSettings() {
   // Mi perfil
   html += `
     <div class="section-label">Mi cuenta</div>
-    <div class="form-card" style="cursor:pointer;" onclick="openMyProfile()">
+    <div class="form-card" style="cursor:pointer;" onclick="openMyProfile()" role="button" tabindex="0" aria-label="Ver mi perfil">
       <div class="form-row" style="display:flex;align-items:center;gap:10px;">
         ${avatarHTML(CURRENT_USER)}
         <div style="flex:1;">
           <div style="font-size:13px;font-weight:500;">${escapeHtml(CURRENT_USER.name)}</div>
           <div style="font-size:11px;color:var(--gray-500);">${CURRENT_USER.role === 'admin' ? 'Admin' : 'Editor'} · ${CURRENT_USER.email}</div>
         </div>
-        <i class="ti ti-chevron-right" style="color:var(--gray-300);"></i>
+        <i class="ti ti-chevron-right" style="color:var(--gray-300);" aria-hidden="true"></i>
       </div>
     </div>`;
 
@@ -1493,17 +1742,17 @@ function renderSettings() {
     html += `<div class="section-label">Equipo · ${TEAM.length}</div><div class="form-card">`;
     TEAM.filter(u => u.id !== CURRENT_USER.id).forEach(u => {
       html += `
-        <div class="user-row" onclick="openEditUser('${u.id}')">
+        <div class="user-row" onclick="openEditUser('${u.id}')" role="button" tabindex="0" aria-label="Editar a ${escapeHtml(u.name)}">
           ${avatarHTML(u)}
           <div class="user-row-info">
             <div class="user-row-name">${escapeHtml(u.name)}</div>
             <div class="user-row-meta">${u.role === 'admin' ? 'Admin' : 'Editor'} · ${u.phone}</div>
           </div>
-          <i class="ti ti-chevron-right user-row-chevron"></i>
+          <i class="ti ti-chevron-right user-row-chevron" aria-hidden="true"></i>
         </div>`;
     });
     html += `</div>
-      <button class="btn-secondary" style="margin-top:8px;" onclick="toast('Agregar usuario: disponible en Paso 2 (Firebase)')"><i class="ti ti-user-plus"></i> Agregar usuario</button>`;
+      <button class="btn-secondary" style="margin-top:8px;" onclick="openAddUserModal()"><i class="ti ti-user-plus" aria-hidden="true"></i> Agregar usuario</button>`;
   }
 
   // Backups & Calendar (admins only)
@@ -1516,7 +1765,7 @@ function renderSettings() {
             <div style="font-size:13px;font-weight:500;">Google Sheets</div>
             <div style="font-size:11px;color:var(--gray-500);">Último: hoy 03:00 · Diario</div>
           </div>
-          <span style="background:rgba(26,158,117,0.15);color:var(--green);padding:3px 10px;border-radius:8px;font-size:11px;font-weight:500;">Activo</span>
+          <span style="background:rgba(16,107,83,0.15);color:var(--green-strong);padding:3px 10px;border-radius:8px;font-size:11px;font-weight:500;">Activo</span>
         </div>
       </div>
 
@@ -1527,7 +1776,7 @@ function renderSettings() {
             <div style="font-size:13px;font-weight:500;">Urban Tasks</div>
             <div style="font-size:11px;color:var(--gray-500);">9 miembros suscritos</div>
           </div>
-          <span style="background:rgba(26,158,117,0.15);color:var(--green);padding:3px 10px;border-radius:8px;font-size:11px;font-weight:500;">Conectado</span>
+          <span style="background:rgba(16,107,83,0.15);color:var(--green-strong);padding:3px 10px;border-radius:8px;font-size:11px;font-weight:500;">Conectado</span>
         </div>
       </div>`;
   }
@@ -1556,7 +1805,7 @@ function renderSettings() {
 function openMyProfile() {
   showModal(`
     <div class="modal-header">
-      <button class="modal-close" onclick="closeModal()"><i class="ti ti-arrow-left"></i></button>
+      <button class="modal-close" onclick="closeModal()" aria-label="Volver"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
       <div class="modal-title" style="margin:0 auto;font-size:14px;">Mi perfil</div>
       <div style="width:32px;"></div>
     </div>
@@ -1567,13 +1816,13 @@ function openMyProfile() {
       <div class="profile-role">${CURRENT_USER.role === 'admin' ? 'Admin' : 'Editor'} · ${CURRENT_USER.email}</div>
     </div>
 
-    <div class="form-card" style="cursor:pointer;" onclick="openChangePassModal(false)">
+    <div class="form-card" style="cursor:pointer;" onclick="openChangePassModal(false)" role="button" tabindex="0">
       <div class="form-row" style="display:flex;justify-content:space-between;align-items:center;">
         <div>
           <div style="font-size:13px;font-weight:500;">Cambiar contraseña</div>
           <div style="font-size:11px;color:var(--gray-500);">Tu clave es privada</div>
         </div>
-        <i class="ti ti-chevron-right" style="color:var(--gray-300);"></i>
+        <i class="ti ti-chevron-right" style="color:var(--gray-300);" aria-hidden="true"></i>
       </div>
     </div>
 
@@ -1591,18 +1840,18 @@ function openMyProfile() {
     <div class="section-label">Cómo prefiero recibir tareas</div>
     <div class="form-card">
       <div class="form-row" style="display:flex;justify-content:space-between;align-items:center;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <i class="ti ti-brand-whatsapp" style="font-size:18px;color:var(--green);"></i>
+        <label for="notifWsp" style="display:flex;align-items:center;gap:10px;">
+          <i class="ti ti-brand-whatsapp" style="font-size:18px;color:var(--green);" aria-hidden="true"></i>
           <span style="font-size:13px;">WhatsApp</span>
-        </div>
-        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </label>
+        ${toggleInputHTML('notifWsp', true)}
       </div>
       <div class="form-row" style="display:flex;justify-content:space-between;align-items:center;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <i class="ti ti-mail" style="font-size:18px;color:var(--blue);"></i>
+        <label for="notifEmail" style="display:flex;align-items:center;gap:10px;">
+          <i class="ti ti-mail" style="font-size:18px;color:var(--blue);" aria-hidden="true"></i>
           <span style="font-size:13px;">Email</span>
-        </div>
-        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </label>
+        ${toggleInputHTML('notifEmail', true)}
       </div>
     </div>
   `);
@@ -1612,28 +1861,28 @@ function openChangePassModal(forced) {
   showModal(`
     <div class="modal-header">
       <div class="modal-title">Cambiar contraseña</div>
-      ${!forced ? `<button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>` : '<div style="width:32px;"></div>'}
+      ${!forced ? `<button class="modal-close" onclick="closeModal()" aria-label="Cerrar"><i class="ti ti-x" aria-hidden="true"></i></button>` : '<div style="width:32px;"></div>'}
     </div>
 
-    ${forced ? `<div class="info-banner"><i class="ti ti-shield-lock"></i><div class="info-banner-text">Te restablecieron la contraseña. Define una nueva antes de continuar.</div></div>` : ''}
+    ${forced ? `<div class="info-banner"><i class="ti ti-shield-lock" aria-hidden="true"></i><div class="info-banner-text">Te restablecieron la contraseña. Define una nueva antes de continuar.</div></div>` : ''}
 
     <div class="form-card">
       <div class="form-row">
-        <div class="form-label">Contraseña actual</div>
+        <label class="form-label" for="oldPass">Contraseña actual</label>
         <input type="password" class="form-input" id="oldPass">
       </div>
       <div class="form-row">
-        <div class="form-label">Nueva contraseña</div>
+        <label class="form-label" for="newPass">Nueva contraseña</label>
         <input type="password" class="form-input" id="newPass" placeholder="Mínimo 6 caracteres">
       </div>
       <div class="form-row">
-        <div class="form-label">Confirmar nueva contraseña</div>
+        <label class="form-label" for="confirmPass">Confirmar nueva contraseña</label>
         <input type="password" class="form-input" id="confirmPass">
       </div>
     </div>
 
     <div class="info-banner">
-      <i class="ti ti-info-circle"></i>
+      <i class="ti ti-info-circle" aria-hidden="true"></i>
       <div class="info-banner-text">Si la olvidas, Danilo o Jose pueden restablecerla.</div>
     </div>
 
@@ -1650,6 +1899,7 @@ function saveNewPass(forced) {
   if (newP !== conf) { toast('Las contraseñas no coinciden'); return; }
   CURRENT_USER.pass = newP;
   CURRENT_USER.mustChange = false;
+  db.ref('team/' + CURRENT_USER.id).update({ pass: newP, mustChange: false });
   closeModal();
   toast('Contraseña actualizada');
 }
@@ -1658,7 +1908,7 @@ function openEditUser(uid) {
   const u = getUser(uid);
   showModal(`
     <div class="modal-header">
-      <button class="modal-close" onclick="closeModal()"><i class="ti ti-arrow-left"></i></button>
+      <button class="modal-close" onclick="closeModal()" aria-label="Volver"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
       <div class="modal-title" style="margin:0 auto;font-size:14px;">Editar usuario</div>
       <div style="width:32px;"></div>
     </div>
@@ -1670,32 +1920,29 @@ function openEditUser(uid) {
 
     <div class="form-card">
       <div class="form-row">
-        <div class="form-label">Nombre</div>
+        <label class="form-label" for="editName">Nombre</label>
         <input type="text" class="form-input" id="editName" value="${escapeHtml(u.name)}">
       </div>
       <div class="form-row">
-        <div class="form-label">Usuario (login)</div>
-        <input type="text" class="form-input" value="${u.id}" disabled style="color:var(--gray-500);">
+        <label class="form-label" for="editLoginId">Usuario (login)</label>
+        <input type="text" class="form-input" id="editLoginId" value="${u.id}" disabled style="color:var(--gray-500);">
       </div>
       <div class="form-row">
-        <div class="form-label">Teléfono</div>
+        <label class="form-label" for="editPhone">Teléfono</label>
         <input type="text" class="form-input" id="editPhone" value="${u.phone}">
       </div>
       <div class="form-row">
-        <div class="form-label">Email</div>
+        <label class="form-label" for="editEmail">Email</label>
         <input type="text" class="form-input" id="editEmail" value="${u.email}">
       </div>
       <div class="form-row">
-        <div class="form-label">Rol</div>
-        <div class="pill-row" id="editRole">
-          <div class="pill ${u.role==='admin'?'active':''}" data-val="admin" onclick="selectPill(this,'editRole')">Admin</div>
-          <div class="pill ${u.role==='editor'?'active':''}" data-val="editor" onclick="selectPill(this,'editRole')">Editor</div>
-        </div>
+        <div class="form-label" id="editRoleLabel">Rol</div>
+        ${pillRadioGroup('editRole', [{id:'admin',label:'Admin'},{id:'editor',label:'Editor'}], u.role)}
       </div>
     </div>
 
-    <button class="btn-outline" onclick="openResetPass('${u.id}')"><i class="ti ti-key"></i> Restablecer contraseña</button>
-    <button class="btn-danger" style="margin-top:8px;" onclick="deleteUser('${u.id}')"><i class="ti ti-trash"></i> Eliminar usuario</button>
+    <button class="btn-outline" onclick="openResetPass('${u.id}')"><i class="ti ti-key" aria-hidden="true"></i> Restablecer contraseña</button>
+    <button class="btn-danger" style="margin-top:8px;" onclick="deleteUser('${u.id}')"><i class="ti ti-trash" aria-hidden="true"></i> Eliminar usuario</button>
     <button class="btn-primary" style="margin-top:8px;" onclick="saveUser('${u.id}')">Guardar cambios</button>
   `);
 }
@@ -1705,7 +1952,8 @@ function saveUser(uid) {
   u.name = document.getElementById('editName').value.trim();
   u.phone = document.getElementById('editPhone').value.trim();
   u.email = document.getElementById('editEmail').value.trim();
-  u.role = document.querySelector('#editRole .pill.active').dataset.val;
+  u.role = pillGroupValue('editRole') || u.role;
+  db.ref('team/' + uid).update({ name: u.name, phone: u.phone, email: u.email, role: u.role });
   closeModal();
   renderSettings();
   toast('Usuario actualizado');
@@ -1714,10 +1962,70 @@ function saveUser(uid) {
 function deleteUser(uid) {
   if (!confirm('¿Eliminar usuario? Las tareas asignadas a él quedarán sin responsable.')) return;
   const i = TEAM.findIndex(u => u.id === uid);
-  TEAM.splice(i, 1);
+  if (i >= 0) TEAM.splice(i, 1);
+  db.ref('team/' + uid).remove();
   closeModal();
   renderSettings();
   toast('Usuario eliminado');
+}
+
+function openAddUserModal() {
+  showModal(`
+    <div class="modal-header">
+      <div class="modal-title">Agregar usuario</div>
+      <button class="modal-close" onclick="closeModal()" aria-label="Cerrar"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <div class="form-card">
+      <div class="form-row">
+        <label class="form-label" for="newUserName">Nombre</label>
+        <input type="text" class="form-input" id="newUserName" placeholder="Nombre completo">
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="newUserId">Usuario (login)</label>
+        <input type="text" class="form-input" id="newUserId" placeholder="ej: maria">
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="newUserPhone">Teléfono</label>
+        <input type="text" class="form-input" id="newUserPhone" placeholder="+56...">
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="newUserEmail">Email</label>
+        <input type="text" class="form-input" id="newUserEmail" placeholder="nombre@urbancomercial.cl">
+      </div>
+      <div class="form-row">
+        <div class="form-label" id="newUserRoleLabel">Rol</div>
+        ${pillRadioGroup('newUserRole', [{id:'admin',label:'Admin'},{id:'editor',label:'Editor'}], 'editor')}
+      </div>
+    </div>
+    <div class="info-banner">
+      <i class="ti ti-info-circle" aria-hidden="true"></i>
+      <div class="info-banner-text">La clave inicial será <b>urban2026</b>. Deberá cambiarla al ingresar.</div>
+    </div>
+    <button class="btn-primary" onclick="saveNewUser()">Crear usuario</button>
+  `);
+}
+
+const NEW_USER_COLORS = [
+  { bg: '#C5E8DA', fg: '#1a5d44' }, { bg: '#FFE066', fg: '#663d00' }, { bg: '#B5D4F4', fg: '#0C447C' },
+  { bg: '#AFA9EC', fg: '#26215C' }, { bg: '#F4C0D1', fg: '#72243E' }, { bg: '#9FE1CB', fg: '#085041' },
+  { bg: '#F0997B', fg: '#4A1B0C' }, { bg: '#F5C4B3', fg: '#712B13' }
+];
+
+function saveNewUser() {
+  const name = document.getElementById('newUserName').value.trim();
+  const id = document.getElementById('newUserId').value.trim().toLowerCase().replace(/[^a-z0-9]/g,'');
+  const phone = document.getElementById('newUserPhone').value.trim();
+  const email = document.getElementById('newUserEmail').value.trim();
+  const role = pillGroupValue('newUserRole') || 'editor';
+  if (!name || !id) { toast('Falta nombre o usuario de login'); return; }
+  if (getUser(id).id === id) { toast('Ese usuario ya existe'); return; }
+  const color = NEW_USER_COLORS[TEAM.length % NEW_USER_COLORS.length];
+  const newUser = { id, name, role, phone, email, pass: 'urban2026', mustChange: true, color };
+  TEAM.push(newUser);
+  db.ref('team/' + id).set(newUser);
+  closeModal();
+  renderSettings();
+  toast('Usuario creado');
 }
 
 function openResetPass(uid) {
@@ -1729,31 +2037,31 @@ function openResetPass(uid) {
         <div class="modal-subtitle">Restablecer para</div>
         <div class="modal-title">${escapeHtml(u.name)}</div>
       </div>
-      <button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>
+      <button class="modal-close" onclick="closeModal()" aria-label="Cerrar"><i class="ti ti-x" aria-hidden="true"></i></button>
     </div>
 
     <div class="form-card">
       <div class="form-row" style="display:flex;align-items:center;gap:8px;">
         <div style="flex:1;">
-          <div class="form-label">Nueva contraseña</div>
+          <label class="form-label" for="resetPass">Nueva contraseña</label>
           <input type="text" class="form-input" id="resetPass" value="${generated}" style="font-family:monospace;">
         </div>
-        <button style="background:var(--bg);border-radius:8px;padding:6px 10px;font-size:11px;color:var(--gray-700);" onclick="document.getElementById('resetPass').value='urban'+Math.floor(1000+Math.random()*9000)"><i class="ti ti-refresh"></i> Generar</button>
+        <button style="background:var(--bg);border-radius:8px;padding:6px 10px;font-size:11px;color:var(--gray-700);" onclick="document.getElementById('resetPass').value='urban'+Math.floor(1000+Math.random()*9000)"><i class="ti ti-refresh" aria-hidden="true"></i> Generar</button>
       </div>
     </div>
 
     <div class="form-card">
       <div class="form-row" style="display:flex;justify-content:space-between;align-items:center;">
-        <div>
+        <label for="notifyWsp">
           <div style="font-size:13px;font-weight:500;">Avisar por WhatsApp</div>
           <div style="font-size:11px;color:var(--gray-500);">Enviar la nueva clave a ${u.phone}</div>
-        </div>
-        <div class="toggle on" id="notifyWsp" onclick="this.classList.toggle('on')"></div>
+        </label>
+        ${toggleInputHTML('notifyWsp', true)}
       </div>
     </div>
 
     <div class="info-banner">
-      <i class="ti ti-info-circle"></i>
+      <i class="ti ti-info-circle" aria-hidden="true"></i>
       <div class="info-banner-text">${escapeHtml(u.name)} deberá cambiarla en su próximo ingreso.</div>
     </div>
 
@@ -1764,9 +2072,10 @@ function openResetPass(uid) {
 function confirmReset(uid) {
   const u = getUser(uid);
   const newP = document.getElementById('resetPass').value;
-  const notify = document.getElementById('notifyWsp').classList.contains('on');
+  const notify = document.getElementById('notifyWsp').checked;
   u.pass = newP;
   u.mustChange = true;
+  db.ref('team/' + uid).update({ pass: newP, mustChange: true });
   if (notify) {
     const msg = `Urban Tasks: tu nueva contraseña es *${newP}*. Cámbiala al ingresar.`;
     window.open(`https://wa.me/${u.phone.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
@@ -1860,6 +2169,24 @@ function deleteNote(id) {
   closeModal();
   renderNotes();
 }
+
+// ============= ACCESIBILIDAD: soporte de teclado global =============
+// Muchas tarjetas (tareas, kanban, calendario) son <div> interactivos por diseño;
+// esto permite activarlas con Enter/Espacio cuando llegan por teclado (role="button").
+document.addEventListener('keydown', e => {
+  const role = e.target.getAttribute && e.target.getAttribute('role');
+  if ((e.key === 'Enter' || e.key === ' ') && (role === 'button' || role === 'checkbox')) {
+    e.preventDefault();
+    e.target.click();
+  }
+  // Escape cierra el modal abierto (evita quedar "atrapado" navegando con teclado)
+  if (e.key === 'Escape' && document.getElementById('modalContainer').innerHTML.trim()) {
+    closeModal();
+  }
+});
+
+// ============= ARRANQUE =============
+bootTeam();
 </script>
 
 </body>
